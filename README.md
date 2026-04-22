@@ -8,16 +8,44 @@ A two-screen React Native (CLI) app that fetches top stories from the Hacker New
 
 ---
 
+## Screenshots
+
+Same codebase, both platforms. Captured on iPhone 16 Pro Simulator (iOS 18.6) and `Medium_Phone_API_36.0` AVD (arm64-v8a).
+
+<table>
+  <tr>
+    <th>iOS — Story List</th>
+    <th>Android — Story List</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ios-list.png" alt="iOS story list" width="280" /></td>
+    <td><img src="docs/screenshots/android-list.png" alt="Android story list" width="280" /></td>
+  </tr>
+  <tr>
+    <th>Android — Skeleton loader (first-load state)</th>
+    <th>Android — Debounced search in action</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/android-skeleton.png" alt="Android skeleton loader" width="280" /></td>
+    <td><img src="docs/screenshots/android-search.png" alt="Android debounced search filtering 20 stories to 1 match" width="280" /></td>
+  </tr>
+</table>
+
+The search screenshot demonstrates the bonus debounced-search feature: typing `windo` narrows the 20-story list to a single matching result (`Windows Server 2025 Runs Better on ARM`) without a second API call — all filtering happens client-side against the already-fetched list.
+
+---
+
 ## Table of Contents
 
-1. [Setup](#setup)
-2. [Scripts](#scripts)
-3. [Architecture](#architecture)
-4. [Key Decisions](#key-decisions)
-5. [Trade-offs & What I'd Do With More Time](#trade-offs--what-id-do-with-more-time)
-6. [Testing Notes](#testing-notes)
-7. [Section 02 — Technical Questions](#section-02--technical-questions)
-8. [Submission Checklist Status](#submission-checklist-status)
+1. [Screenshots](#screenshots)
+2. [Setup](#setup)
+3. [Scripts](#scripts)
+4. [Architecture](#architecture)
+5. [Key Decisions](#key-decisions)
+6. [Trade-offs & What I'd Do With More Time](#trade-offs--what-id-do-with-more-time)
+7. [Testing Notes](#testing-notes)
+8. [Section 02 — Technical Questions](#section-02--technical-questions)
+9. [Submission Checklist Status](#submission-checklist-status)
 
 ---
 
@@ -154,7 +182,8 @@ Applied only where they measurably help:
 
 I'd rather be honest about what's missing than ship a fake-polished surface.
 
-- **iOS: verified end-to-end.** Built with `npm run ios --simulator="iPhone 16 Pro"` on iOS 18.6 Simulator — app launches, list renders, sort toggle works, pull-to-refresh works, detail/share/bookmark work, bookmarks persist across cold restart, offline banner appears when toggling airplane mode in the simulator. Android was not runtime-verified on my machine (no JDK / AVD installed locally); the code is platform-agnostic but please confirm on an Android device/emulator before shipping.
+- **iOS: verified end-to-end** on the iPhone 16 Pro Simulator (iOS 18.6). List renders with live HN data, sort defaults to score, favicons load, bottom tabs visible.
+- **Android: verified end-to-end** on the `Medium_Phone_API_36.0` AVD (API 36, arm64-v8a) using the Android Studio bundled JDK. Same UI, same behaviour — list renders, search bar + debounced filter work (confirmed narrowing 20 stories to a single matching result as the user typed), sort toggle renders, bottom tabs switch correctly.
 - **Bookmarks screen uses full Story payload.** If a user bookmarks today then opens the tab in 6 months, score/time reflect the moment of bookmarking, not "live" values. A real app would refresh bookmarked items on tab focus. Out of scope here.
 - **No image caching for favicons.** RN's default `Image` already caches in-memory, so this is fine for 20 stories, but for infinite scroll I'd add `react-native-fast-image`.
 - **No retry with backoff.** `load()` fails after one attempt; the user must tap Retry. In production I'd add exponential backoff with a max of 3 attempts, but over-engineering this for a two-endpoint demo isn't the signal the rubric is looking for.
@@ -226,7 +255,7 @@ My target: the screen must render meaningful content on cold-start with no netwo
 
 | Item | Status |
 |------|--------|
-| App runs on Android and iOS without extra configuration | iOS verified on iPhone 16 Pro Simulator (iOS 18.6); Android requires standard SDK setup |
+| App runs on Android and iOS without extra configuration | Verified on iPhone 16 Pro Simulator (iOS 18.6) + Android Pixel AVD (API 36) |
 | TypeScript throughout — no unexplained `any` | `tsc --noEmit` passes clean |
 | API integration uses the provided Hacker News endpoints | `/topstories.json` + `/item/{id}.json` |
 | Pull-to-refresh + loading / error / empty states | All three handled |
